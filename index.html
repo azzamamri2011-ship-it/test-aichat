@@ -3,11 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Zaam-Asisten Enterprise v4.5</title>
+    <title>Zaam-Asisten Enterprise v4.5 | Ultimate AI Interface</title>
     
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/marked/9.1.2/marked.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
@@ -16,11 +17,20 @@
 
         :root {
             --zaam-primary: #6366f1;
+            --zaam-primary-dark: #4f46e5;
             --zaam-bg: #050507;
-            --zaam-surface: rgba(15, 15, 20, 0.9);
+            --zaam-surface: rgba(15, 15, 20, 0.95);
             --zaam-border: rgba(255, 255, 255, 0.08);
             --zaam-glow: rgba(99, 102, 241, 0.15);
+            --sidebar-width: 320px;
         }
+
+        /* --- Global Reset & Scrollbars --- */
+        * { scrollbar-width: thin; scrollbar-color: var(--zaam-border) transparent; }
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: var(--zaam-border); border-radius: 10px; }
+        ::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.2); }
 
         body {
             font-family: 'Plus Jakarta Sans', sans-serif;
@@ -29,156 +39,258 @@
             height: 100vh;
             overflow: hidden;
             background-image: 
-                radial-gradient(circle at 0% 0%, var(--zaam-glow) 0%, transparent 40%),
-                radial-gradient(circle at 100% 100%, rgba(168, 85, 247, 0.1) 0%, transparent 40%);
+                radial-gradient(circle at 10% 10%, var(--zaam-glow) 0%, transparent 40%),
+                radial-gradient(circle at 90% 90%, rgba(168, 85, 247, 0.08) 0%, transparent 40%);
         }
 
+        /* --- Glassmorphism Components --- */
         .zaam-glass {
             background: var(--zaam-surface);
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
             border: 1px solid var(--zaam-border);
         }
 
         .sidebar-premium {
-            background: rgba(8, 8, 10, 1);
+            background: #08080a;
             border-right: 1px solid var(--zaam-border);
-            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            width: var(--sidebar-width);
+            transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
-        .chat-canvas::-webkit-scrollbar { width: 5px; }
-        .chat-canvas::-webkit-scrollbar-track { background: transparent; }
-        .chat-canvas::-webkit-scrollbar-thumb { 
-            background: var(--zaam-border); 
-            border-radius: 20px;
-        }
+        /* --- Typography & Markdown Style --- */
+        .prose { color: #d4d4d8; max-width: 100%; }
+        .prose code { font-family: 'Fira Code', monospace; background: rgba(255,255,255,0.1); padding: 0.2rem 0.4rem; border-radius: 4px; color: #818cf8; }
+        .prose pre { background: #000 !important; border: 1px solid var(--zaam-border); border-radius: 12px; margin: 1.5rem 0; position: relative; }
+        .prose pre::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px; background: linear-gradient(90deg, var(--zaam-primary), transparent); }
+        .prose a { color: var(--zaam-primary); text-decoration: none; border-bottom: 1px dashed; }
+        .prose blockquote { border-left: 4px solid var(--zaam-primary); background: rgba(99, 102, 241, 0.05); padding: 1rem; font-style: italic; }
 
-        .prose pre {
-            background: #000000 !important;
-            border: 1px solid var(--zaam-border);
-            padding: 1.25rem;
-            border-radius: 14px;
-            margin: 1rem 0;
-        }
+        /* --- Animations --- */
+        @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        .msg-anim { animation: slideUp 0.4s ease-out forwards; }
+        
+        .pulse-status { animation: pulseGreen 2s infinite; }
+        @keyframes pulseGreen { 0% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.4); } 70% { box-shadow: 0 0 0 8px rgba(16, 185, 129, 0); } 100% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); } }
 
-        .status-pill {
-            background: rgba(16, 185, 129, 0.1);
-            border: 1px solid rgba(16, 185, 129, 0.2);
-            color: #10b981;
-            padding: 4px 12px;
-            border-radius: 100px;
-            font-size: 10px;
-            font-weight: 700;
-        }
+        /* --- Custom UI Classes --- */
+        .input-group:focus-within { border-color: var(--zaam-primary); box-shadow: 0 0 25px rgba(99, 102, 241, 0.1); }
+        .history-item.active { background: rgba(99, 102, 241, 0.1); border-color: rgba(99, 102, 241, 0.3); color: white; }
 
-        .input-container {
-            background: rgba(20, 20, 25, 0.6);
-            border: 1px solid var(--zaam-border);
-            border-radius: 24px;
-        }
-
-        .pulse-dot {
-            width: 6px;
-            height: 6px;
-            background: var(--zaam-primary);
-            border-radius: 50%;
-            animation: pulseAnim 1.4s infinite ease-in-out both;
-        }
-        @keyframes pulseAnim {
-            0%, 80%, 100% { transform: scale(0.3); opacity: 0.5; }
-            40% { transform: scale(1); opacity: 1; }
-        }
+        /* --- Mobile Overlay --- */
+        #sidebar-overlay { display: none; background: rgba(0,0,0,0.5); backdrop-filter: blur(4px); z-index: 90; }
+        #sidebar-overlay.active { display: block; position: fixed; inset: 0; }
 
         @media (max-width: 1024px) {
-            #sidebar { position: fixed; height: 100%; z-index: 100; transform: translateX(-100%); }
-            #sidebar.open { transform: translateX(0); }
+            .sidebar-premium { position: fixed; height: 100%; z-index: 100; transform: translateX(-100%); }
+            .sidebar-premium.open { transform: translateX(0); }
         }
     </style>
 </head>
 <body class="flex w-full" id="app-root">
 
-    <button id="mobile-toggle" onclick="toggleSidebar()" class="lg:hidden fixed top-4 left-4 z-[110] w-10 h-10 zaam-glass rounded-xl flex items-center justify-center text-zinc-400">
-        <i class="fas fa-bars"></i>
-    </button>
+    <div id="sidebar-overlay" onclick="toggleSidebar()"></div>
 
-    <aside id="sidebar" class="w-80 sidebar-premium flex flex-col p-6 shrink-0 transition-transform lg:translate-x-0">
-        <div class="flex items-center gap-4 mb-10 px-2">
-            <div class="w-10 h-10 bg-indigo-600 rounded-2xl flex items-center justify-center shadow-lg">
-                <i class="fas fa-microchip text-white text-lg"></i>
+    <aside id="sidebar" class="sidebar-premium flex flex-col p-5 shrink-0 overflow-hidden">
+        <div class="flex items-center gap-4 mb-8 px-2">
+            <div class="w-11 h-11 bg-gradient-to-br from-indigo-600 to-purple-600 rounded-2xl flex items-center justify-center shadow-lg shadow-indigo-500/20">
+                <i class="fas fa-bolt-lightning text-white text-xl"></i>
             </div>
-            <div>
-                <h1 class="font-bold text-lg text-white">Zaam-Asisten</h1>
-                <p class="text-[9px] font-bold text-zinc-500 uppercase tracking-widest">Enterprise Protocol</p>
+            <div class="overflow-hidden">
+                <h1 class="font-bold text-lg text-white leading-tight truncate">Zaam-Asisten</h1>
+                <p class="text-[10px] font-bold text-zinc-500 uppercase tracking-[0.2em]">v4.5 Enterprise</p>
             </div>
         </div>
 
-        <button onclick="createNewChat()" class="w-full py-4 bg-white/5 border border-white/10 rounded-2xl hover:bg-white/10 transition-all flex items-center justify-center gap-3 text-[11px] font-bold uppercase mb-8">
-            <i class="fas fa-plus-circle"></i> Sesi Baru
-        </button>
-
-        <div class="flex-1 overflow-y-auto space-y-2 chat-canvas" id="history-list">
+        <div class="space-y-3 mb-8">
+            <button onclick="sessionManager.createNew()" class="w-full py-3.5 bg-indigo-600 hover:bg-indigo-500 text-white rounded-2xl transition-all flex items-center justify-center gap-3 text-xs font-bold uppercase tracking-wider shadow-lg shadow-indigo-600/10 active:scale-95">
+                <i class="fas fa-plus"></i> Sesi Baru
+            </button>
+            <div class="grid grid-cols-2 gap-2">
+                <button onclick="uiManager.clearCurrentChat()" class="py-2.5 bg-white/5 hover:bg-red-500/10 border border-white/5 text-zinc-400 hover:text-red-400 rounded-xl transition-all text-[10px] font-bold uppercase">
+                    <i class="fas fa-trash-can mr-2"></i> Bersihkan
+                </button>
+                <button onclick="uiManager.exportChat()" class="py-2.5 bg-white/5 hover:bg-white/10 border border-white/5 text-zinc-400 rounded-xl transition-all text-[10px] font-bold uppercase">
+                    <i class="fas fa-download mr-2"></i> Ekspor
+                </button>
             </div>
+        </div>
+
+        <div class="flex-1 flex flex-col min-h-0">
+            <div class="flex items-center justify-between px-2 mb-4">
+                <p class="text-[10px] font-bold text-zinc-600 uppercase tracking-widest">Aktivitas Terakhir</p>
+                <span class="text-[9px] bg-white/5 px-2 py-0.5 rounded-full text-zinc-500" id="session-count">0 Sesi</span>
+            </div>
+            
+            <div id="history-container" class="flex-1 overflow-y-auto space-y-2 pr-1 custom-scrollbar">
+                <div class="flex flex-col items-center justify-center h-32 opacity-20 text-center">
+                    <i class="fas fa-folder-open text-3xl mb-2"></i>
+                    <p class="text-[10px]">Belum ada riwayat</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="pt-6 border-t border-white/5 mt-auto">
+            <div class="p-4 zaam-glass rounded-2xl flex items-center gap-4 relative overflow-hidden group">
+                <div class="absolute inset-0 bg-indigo-600/5 translate-y-full group-hover:translate-y-0 transition-transform"></div>
+                <div class="w-10 h-10 rounded-full bg-gradient-to-tr from-indigo-500 to-blue-500 flex items-center justify-center border-2 border-white/10 relative z-10">
+                    <i class="fas fa-shield-check text-white"></i>
+                </div>
+                <div class="relative z-10 flex-1 overflow-hidden">
+                    <p class="text-xs font-bold text-white truncate">Premium User</p>
+                    <p class="text-[9px] text-emerald-500 font-bold uppercase tracking-tighter flex items-center gap-1">
+                        <span class="w-1 h-1 bg-emerald-500 rounded-full animate-pulse"></span>
+                        Status: Active
+                    </p>
+                </div>
+                <button class="text-zinc-500 hover:text-white transition-colors relative z-10">
+                    <i class="fas fa-gear"></i>
+                </button>
+            </div>
+        </div>
     </aside>
 
-    <main class="flex-1 flex flex-col relative min-w-0">
-        <header class="h-20 zaam-glass px-8 flex items-center justify-between shrink-0 z-50 border-t-0 border-x-0">
-            <div class="flex items-center gap-4">
-                <div class="status-pill flex items-center gap-2">
-                    <span class="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse"></span>
-                    <span id="status-text">ACTIVE ENGINE</span>
+    <main class="flex-1 flex flex-col relative min-w-0 h-full overflow-hidden">
+        
+        <header class="h-20 zaam-glass px-6 md:px-10 flex items-center justify-between shrink-0 z-50">
+            <div class="flex items-center gap-5">
+                <button onclick="toggleSidebar()" class="lg:hidden w-10 h-10 bg-white/5 rounded-xl flex items-center justify-center text-zinc-400">
+                    <i class="fas fa-bars-staggered"></i>
+                </button>
+                <div class="hidden sm:flex flex-col">
+                    <div class="flex items-center gap-2 mb-0.5">
+                        <span class="w-2 h-2 bg-emerald-500 rounded-full pulse-status"></span>
+                        <span id="status-label" class="text-[10px] font-black text-white uppercase tracking-widest">System Operational</span>
+                    </div>
+                    <p id="model-indicator" class="text-[9px] text-zinc-500 font-bold uppercase tracking-widest opacity-60">Handshake Secure Layer v4.0</p>
                 </div>
             </div>
 
-            <select id="engine-selector" class="bg-zinc-900 border border-zinc-800 text-[10px] font-bold text-zinc-300 py-2.5 px-6 rounded-xl outline-none focus:border-indigo-500 uppercase cursor-pointer">
-                <option value="gpt">GPT-4 Turbo (Stable)</option>
-                <option value="gemini">Gemini Pro (Vision)</option>
-            </select>
+            <div class="flex items-center gap-3">
+                <div class="relative group hidden md:block">
+                    <select id="engine-selector" class="appearance-none bg-zinc-900/80 border border-white/5 text-[10px] font-bold text-zinc-300 py-3 px-8 rounded-2xl outline-none focus:border-indigo-500 transition-all uppercase tracking-widest cursor-pointer pr-12">
+                        <option value="gpt">GPT-4 Omni (Fast)</option>
+                        <option value="gemini">Gemini 1.5 Pro</option>
+                        <option value="claude">Claude 3.5 Sonnet</option>
+                    </select>
+                    <i class="fas fa-chevron-down absolute right-5 top-1/2 -translate-y-1/2 text-[9px] text-zinc-600 pointer-events-none"></i>
+                </div>
+                <div class="w-[1px] h-8 bg-white/5 mx-2 hidden md:block"></div>
+                <button class="w-10 h-10 rounded-xl hover:bg-white/5 text-zinc-500 transition-all">
+                    <i class="fas fa-magnifying-glass"></i>
+                </button>
+            </div>
         </header>
 
-        <div id="chat-window" class="flex-1 overflow-y-auto px-6 md:px-12 py-10 space-y-12 chat-canvas">
-            <div id="messages-container" class="max-w-4xl mx-auto space-y-12">
+        <div id="chat-window" class="flex-1 overflow-y-auto px-4 md:px-0 py-8 custom-scrollbar scroll-smooth">
+            <div id="messages-container" class="max-w-4xl mx-auto space-y-10">
+                <div id="welcome-screen" class="py-20 text-center space-y-6">
+                    <div class="w-20 h-20 bg-indigo-600/10 rounded-3xl flex items-center justify-center mx-auto mb-10">
+                        <i class="fas fa-robot text-4xl text-indigo-500"></i>
+                    </div>
+                    <h2 class="text-3xl font-bold text-white tracking-tight">Halo, apa yang bisa saya bantu?</h2>
+                    <p class="text-zinc-500 max-w-md mx-auto text-sm leading-relaxed">
+                        Zaam-Asisten Enterprise siap membantu pekerjaan kompleks Anda mulai dari analisis kode hingga pengolahan data dokumen.
+                    </p>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-3 max-w-2xl mx-auto mt-12">
+                        <button onclick="uiManager.fillPrompt('Jelaskan konsep Quantum Computing secara sederhana.')" class="p-4 bg-white/5 border border-white/5 rounded-2xl text-left hover:bg-white/10 transition-all group">
+                            <i class="fas fa-atom text-indigo-400 mb-3"></i>
+                            <p class="text-[11px] font-bold text-zinc-300 uppercase mb-1">Edukasi</p>
+                            <p class="text-xs text-zinc-500 group-hover:text-zinc-400">Jelaskan Quantum Computing...</p>
+                        </button>
+                        <button onclick="uiManager.fillPrompt('Bantu buatkan struktur database untuk aplikasi e-commerce.')" class="p-4 bg-white/5 border border-white/5 rounded-2xl text-left hover:bg-white/10 transition-all group">
+                            <i class="fas fa-database text-purple-400 mb-3"></i>
+                            <p class="text-[11px] font-bold text-zinc-300 uppercase mb-1">Teknis</p>
+                            <p class="text-xs text-zinc-500 group-hover:text-zinc-400">Arsitektur database...</p>
+                        </button>
+                        <button onclick="uiManager.fillPrompt('Buat draf email profesional untuk negosiasi gaji.')" class="p-4 bg-white/5 border border-white/5 rounded-2xl text-left hover:bg-white/10 transition-all group">
+                            <i class="fas fa-pen-nib text-emerald-400 mb-3"></i>
+                            <p class="text-[11px] font-bold text-zinc-300 uppercase mb-1">Karir</p>
+                            <p class="text-xs text-zinc-500 group-hover:text-zinc-400">Draf email negosiasi...</p>
+                        </button>
+                    </div>
                 </div>
+            </div>
+            <div class="h-32"></div>
         </div>
 
-        <div id="typing-box" class="hidden absolute bottom-32 left-0 right-0 z-10">
-            <div class="max-w-4xl mx-auto px-12">
-                <div class="flex items-center gap-3 text-indigo-400 font-bold uppercase text-[10px]">
+        <div id="typing-indicator" class="hidden absolute bottom-36 left-0 right-0 z-10 pointer-events-none">
+            <div class="max-w-4xl mx-auto px-6">
+                <div class="inline-flex items-center gap-4 bg-zinc-900/90 border border-white/10 backdrop-blur-md py-3 px-6 rounded-2xl shadow-2xl">
                     <div class="flex gap-1.5">
-                        <div class="pulse-dot"></div>
-                        <div class="pulse-dot" style="animation-delay: 0.2s"></div>
-                        <div class="pulse-dot" style="animation-delay: 0.4s"></div>
+                        <div class="w-1.5 h-1.5 bg-indigo-500 rounded-full animate-bounce"></div>
+                        <div class="w-1.5 h-1.5 bg-indigo-500 rounded-full animate-bounce" style="animation-delay: 0.2s"></div>
+                        <div class="w-1.5 h-1.5 bg-indigo-500 rounded-full animate-bounce" style="animation-delay: 0.4s"></div>
                     </div>
-                    Processing Neural Link
+                    <span class="text-[10px] font-black text-indigo-400 uppercase tracking-widest" id="typing-text">AI sedang berpikir...</span>
                 </div>
             </div>
         </div>
 
-        <footer class="p-6 md:p-10 shrink-0">
-            <div class="max-w-4xl mx-auto">
-                <div id="file-shelf" class="hidden flex flex-wrap gap-3 mb-4"></div>
+        <footer class="absolute bottom-0 left-0 right-0 p-6 md:p-8 bg-gradient-to-t from-black via-black/80 to-transparent pointer-events-none">
+            <div class="max-w-4xl mx-auto pointer-events-auto">
+                
+                <div id="preview-shelf" class="hidden flex flex-wrap gap-3 mb-4 transition-all"></div>
 
-                <div class="input-container p-2">
-                    <div class="flex items-end gap-2 px-3">
-                        <input type="file" id="file-upload" class="hidden" multiple onchange="handleFileSelect(event)">
-                        <button onclick="document.getElementById('file-upload').click()" class="mb-1.5 w-11 h-11 hover:bg-white/5 rounded-2xl flex items-center justify-center text-zinc-500">
-                            <i class="fas fa-paperclip text-lg"></i>
-                        </button>
+                <div class="input-group zaam-glass rounded-[28px] p-2 transition-all duration-300">
+                    <div class="flex items-end gap-2 px-2">
+                        <div class="flex items-center gap-1 mb-1">
+                            <input type="file" id="file-upload" class="hidden" multiple onchange="attachmentManager.handle(event)">
+                            <button onclick="document.getElementById('file-upload').click()" class="w-12 h-12 hover:bg-white/5 rounded-2xl flex items-center justify-center text-zinc-500 hover:text-indigo-400 transition-all group" title="Unggah File">
+                                <i class="fas fa-paperclip text-lg group-hover:rotate-12 transition-transform"></i>
+                            </button>
+                        </div>
 
-                        <textarea id="user-input" rows="1" placeholder="Ketik pesan..." class="w-full bg-transparent border-none focus:ring-0 py-4 px-2 text-zinc-100 text-base resize-none" oninput="autoResize(this)"></textarea>
+                        <div class="flex-1 min-w-0 py-2">
+                            <textarea id="main-input" 
+                                rows="1" 
+                                placeholder="Ketik pesan untuk Zaam AI..." 
+                                class="w-full bg-transparent border-none focus:ring-0 py-3 px-2 text-zinc-100 text-sm md:text-base max-h-60 resize-none font-medium placeholder:text-zinc-600"
+                                oninput="uiManager.autoResize(this)"></textarea>
+                        </div>
 
-                        <button id="send-btn" onclick="handleSend()" class="mb-1.5 w-11 h-11 bg-indigo-600 hover:bg-indigo-500 text-white rounded-2xl flex items-center justify-center shadow-lg transition-all active:scale-90">
-                            <i class="fas fa-arrow-up"></i>
-                        </button>
+                        <div class="flex items-center gap-2 mb-1">
+                            <button id="voice-btn" class="w-12 h-12 hover:bg-white/5 rounded-2xl flex items-center justify-center text-zinc-500 hover:text-red-400 transition-all" title="Voice Input">
+                                <i class="fas fa-microphone"></i>
+                            </button>
+                            <button id="send-button" onclick="chatCore.executeSend()" class="w-12 h-12 bg-indigo-600 hover:bg-indigo-500 disabled:opacity-20 disabled:grayscale text-white rounded-[20px] flex items-center justify-center shadow-lg shadow-indigo-500/20 transition-all active:scale-90" title="Kirim">
+                                <i class="fas fa-arrow-up-long text-lg"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="mt-5 flex justify-between items-center px-4">
+                    <p class="text-[9px] text-zinc-700 font-bold uppercase tracking-[0.4em]">Enterprise AI Protocol v4.5 &bull; Jakarta &bull; 2026</p>
+                    <div class="flex gap-4">
+                        <a href="#" class="text-[9px] text-zinc-700 hover:text-zinc-400 transition-colors uppercase font-bold tracking-widest">Bantuan</a>
+                        <a href="#" class="text-[9px] text-zinc-700 hover:text-zinc-400 transition-colors uppercase font-bold tracking-widest">Kebijakan</a>
                     </div>
                 </div>
             </div>
         </footer>
     </main>
 
+    <div id="modal-container" class="hidden fixed inset-0 z-[200] flex items-center justify-center p-4">
+        <div class="absolute inset-0 bg-black/80 backdrop-blur-md"></div>
+        <div class="zaam-glass w-full max-w-sm rounded-3xl p-8 relative z-10 text-center">
+            <div id="modal-icon" class="w-16 h-16 rounded-2xl bg-red-500/10 text-red-500 flex items-center justify-center mx-auto mb-6 text-2xl">
+                <i class="fas fa-triangle-exclamation"></i>
+            </div>
+            <h3 id="modal-title" class="text-xl font-bold text-white mb-2">Terjadi Kesalahan</h3>
+            <p id="modal-desc" class="text-zinc-500 text-sm mb-8 leading-relaxed">Pesan error akan muncul di sini secara detail.</p>
+            <button onclick="uiManager.closeModal()" class="w-full py-4 bg-white/5 hover:bg-white/10 text-white rounded-2xl font-bold text-xs uppercase tracking-widest transition-all">Dimengerti</button>
+        </div>
+    </div>
+
     <script src="script.js"></script>
     <script>
+        // Global Toggle for Sidebar Mobile
         function toggleSidebar() {
-            document.getElementById('sidebar').classList.toggle('open');
+            const sb = document.getElementById('sidebar');
+            const overlay = document.getElementById('sidebar-overlay');
+            sb.classList.toggle('open');
+            overlay.classList.toggle('active');
         }
     </script>
 </body>
